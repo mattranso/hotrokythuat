@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <base target="_top">
+  <!-- Bắt buộc phải có thẻ viewport này để hiển thị tốt trên Mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root {
+      --mttq-red: #da251d; --mttq-red-dark: #a81912;
+      --mttq-yellow: #ffc107; --mttq-yellow-light: #fff3cd;
+      --mttq-orange: #d9534f;
+      --red-yellow-gradient: linear-gradient(135deg, #a81912 0%, #da251d 50%, #f35800 100%);
+    }
+    body { background-color: #f4f6f9; font-family: 'Segoe UI', Arial, sans-serif; display: flex; flex-direction: column; min-height: 100vh;}
+    
+    /* Header & Logo */
+    .header-banner { background: var(--red-yellow-gradient); padding: 30px 15px; text-align: center; color: #ffffff; border-bottom: 6px solid var(--mttq-yellow); margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+    .header-banner img { height: 90px; margin-bottom: 15px; background: #fff; padding: 5px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); object-fit: contain;}
+    .header-banner h2 { font-weight: 900; text-transform: uppercase; font-size: 1.7rem; margin: 0 0 8px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.4); line-height: 1.4; }
+    .header-banner h4 { font-weight: 700; font-size: 1.1rem; color: var(--mttq-yellow); text-shadow: 1px 1px 2px rgba(0,0,0,0.5); margin: 0;}
+    
+    /* Card & Buttons */
+    .card { border: none; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); overflow: hidden; }
+    .card-header { background: var(--red-yellow-gradient); color: #ffffff; font-weight: bold; font-size: 1.2rem; border-bottom: 3px solid var(--mttq-yellow); padding: 15px; }
+    .btn-theme { background: var(--mttq-yellow); color: var(--mttq-red-dark); font-weight: 900; border: 2px solid #e0a800; text-transform: uppercase; }
+    .btn-theme:hover { background: #e0a800; color: #7b0000; }
+    
+    /* Tabs Nav */
+    .nav-tabs { border-bottom: 2px solid #ddd; justify-content: center; margin-bottom: 25px;}
+    .nav-tabs .nav-link { color: #888; font-weight: bold; font-size: 1.05rem; padding: 10px 20px; border: none; cursor: pointer; transition: 0.3s; }
+    .nav-tabs .nav-link.active { color: var(--mttq-red-dark); border-bottom: 4px solid var(--mttq-red); background: transparent; font-weight: 900; }
+    
+    /* Thống kê */
+    .stat-card { background: #fff; border-radius: 8px; padding: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); height: 100%; border: 1px solid #eee; }
+    .stat-card h3 { margin: 10px 0 0 0; font-size: 2.2rem; font-weight: 900; }
+    
+    /* CHAT UI */
+    .chat-container { background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 15px; height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+    .msg-bubble { max-width: 80%; padding: 12px 18px; border-radius: 18px; position: relative; font-size: 0.95rem; }
+    .msg-user { align-self: flex-end; background: var(--mttq-red); color: white; border-bottom-right-radius: 4px; box-shadow: 0 2px 5px rgba(218,37,29,0.3); }
+    .msg-admin { align-self: flex-start; background: #fff; color: #333; border: 1px solid #ddd; border-bottom-left-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .msg-time { font-size: 0.75rem; opacity: 0.8; margin-bottom: 4px; display: block; }
+    
+    /* Zalo Button Hover */
+    .support-btn { cursor: pointer; transition: 0.3s; padding: 5px; border-radius: 8px; }
+    .support-btn:hover { background-color: rgba(255,255,255,0.2); transform: scale(1.05); }
+
+    #trackSection, #adminLoginSection, #adminPanelSection, #chatSection { display: none; }
+    footer { margin-top: auto; padding: 20px; text-align: center; background-color: #fff; border-top: 1px solid #ddd; font-size: 0.9rem; color: #555; }
+
+    /* Admin pills */
+    .nav-pills .nav-link.active { background-color: var(--mttq-red); color: white; }
+    .nav-pills .nav-link { color: var(--mttq-red-dark); font-weight: 600; border: 1px solid #ddd; margin-right: 5px; margin-bottom: 5px;}
+
+    /* TÙY CHỈNH CHO GIAO DIỆN ĐIỆN THOẠI (MOBILE RESPONSIVE) */
+    @media (max-width: 768px) {
+      .header-banner img { height: 75px; }
+      .header-banner h2 { font-size: 1.25rem; }
+      .header-banner h4 { font-size: 0.95rem; line-height: 1.4; }
+      .nav-tabs .nav-link { font-size: 0.9rem; padding: 8px 10px; }
+      .card-body { padding: 1.5rem !important; }
+      .stat-card h3 { font-size: 1.8rem; }
+      .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .table td, .table th { white-space: nowrap; } 
+      .action-buttons button { padding: 4px 8px; font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-banner">
+    <img id="logoImg" src="https://cdn.haitrieu.com/wp-content/uploads/2022/01/Logo-Mat-Tran-To-Quoc-Viet-Nam.png" alt="Logo MTTQ"> 
+    <h2>Ủy ban Mặt trận Tổ quốc Việt Nam<br>Thành phố Đồng Nai</h2>
+    <h4>HỆ THỐNG TIẾP NHẬN, HỖ TRỢ KỸ THUẬT CÁC NỀN TẢNG SỐ</h4>
+  </div>
+
+  <div class="container mb-5">
+    <!-- NAVBAR TAB -->
+    <ul class="nav nav-tabs flex-wrap" id="myTab">
+      <li class="nav-item"><a class="nav-link active" id="form-tab" onclick="switchTab('form')"><i class="fas fa-file-signature me-1"></i>GỬI YÊU CẦU</a></li>
+      <li class="nav-item"><a class="nav-link" id="track-tab" onclick="switchTab('track')"><i class="fas fa-search me-1"></i>TRA CỨU</a></li>
+      <li class="nav-item ms-auto"><a class="nav-link text-danger" id="admin-tab" onclick="switchTab('adminLogin')"><i class="fas fa-cog me-1"></i> QUẢN TRỊ</a></li>
+    </ul>
+
+    <!-- TRANG GỬI YÊU CẦU -->
+    <div id="formSection" class="row justify-content-center">
+      <div class="col-lg-8 col-md-10">
+        <div class="card">
+          <div class="card-header text-center"><i class="fas fa-info-circle"></i> THÔNG TIN CÁ NHÂN / ĐƠN VỊ GỬI</div>
+          <div class="card-body p-4 p-md-5">
+            <form id="dataForm" onsubmit="submitForm(event)">
+              <div class="row">
+                <div class="col-md-6 mb-3"><label class="form-label fw-bold text-secondary">Họ và tên *</label><input type="text" class="form-control" id="hoten" required></div>
+                <div class="col-md-6 mb-3"><label class="form-label fw-bold text-secondary">Số điện thoại *</label><input type="tel" class="form-control" id="sdt" required></div>
+              </div>
+              <div class="mb-3"><label class="form-label fw-bold text-secondary">Email nhận phản hồi *</label><input type="email" class="form-control" id="email" required></div>
+              <div class="mb-3">
+                <label class="form-label fw-bold text-secondary">Nền tảng gặp sự cố *</label>
+                <select class="form-select border-danger shadow-sm" id="nentang" required><option value="" disabled selected>Đang tải danh sách...</option></select>
+              </div>
+              <div class="mb-3"><label class="form-label fw-bold text-secondary">Tiêu đề lỗi / Yêu cầu *</label><input type="text" class="form-control" id="tieude" required></div>
+              <div class="mb-3"><label class="form-label fw-bold text-secondary">Mô tả chi tiết *</label><textarea class="form-control" id="mota" rows="4" required></textarea></div>
+              <button type="submit" class="btn btn-theme w-100 py-3 mt-2 fs-5"><i class="fas fa-paper-plane me-2"></i> GỬI YÊU CẦU</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANG TRA CỨU YÊU CẦU -->
+    <div id="trackSection">
+      <div class="d-flex justify-content-end mb-3"><a id="dbLink" target="_blank" class="btn btn-sm btn-outline-danger fw-bold d-none"><i class="fas fa-database"></i> Mở Database gốc</a></div>
+      <div class="row g-3 mb-4">
+        <div class="col-md-4 col-6"><div class="stat-card" style="border-top: 5px solid #0d6efd;"><div class="fw-bold text-secondary small">TỔNG YÊU CẦU</div><h3 id="statTong" class="text-primary">0</h3></div></div>
+        <div class="col-md-4 col-6"><div class="stat-card" style="border-top: 5px solid #198754;"><div class="fw-bold text-secondary small">ĐÃ XỬ LÝ</div><h3 id="statDaXuLy" class="text-success">0</h3></div></div>
+        <div class="col-md-4 col-12"><div class="stat-card" style="border-top: 5px solid #dc3545;"><div class="fw-bold text-secondary small">CHỜ XỬ LÝ</div><h3 id="statChuaXuLy" class="text-danger">0</h3></div></div>
+      </div>
+      <div class="card border-0 shadow-sm mb-4 border border-danger">
+        <div class="card-body d-flex flex-column flex-md-row gap-3 align-items-center p-4">
+          <div class="input-group input-group-lg">
+            <span class="input-group-text bg-white"><i class="fas fa-search text-danger"></i></span>
+            <input type="text" id="searchCodeInput" class="form-control border-start-0" placeholder="Nhập Mã Yêu cầu (VD: YC1234)..." onkeyup="if(event.key === 'Enter') searchRequest()">
+            <button class="btn btn-dark fw-bold px-4" onclick="searchRequest()">Tra cứu</button>
+          </div>
+        </div>
+      </div>
+      <div id="searchResultArea" class="row"></div>
+    </div>
+
+    <!-- PHÒNG CHAT TƯƠNG TÁC -->
+    <div id="chatSection" class="row justify-content-center">
+      <div class="col-lg-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+          <button class="btn btn-outline-secondary fw-bold w-auto" onclick="switchTab(globalData.isAdmin ? 'adminLogin' : 'track')"><i class="fas fa-arrow-left"></i> Quay lại</button>
+          <span id="chatStatusBadge" class="fs-5"></span>
+          <div id="adminStatusAction" class="d-none">
+            <button class="btn btn-success fw-bold" onclick="adminToggleStatus('Đã xử lý')"><i class="fas fa-check"></i> Đánh dấu Xong</button>
+            <button class="btn btn-danger fw-bold ms-2" onclick="adminToggleStatus('Chờ xử lý')"><i class="fas fa-clock"></i> Chờ xử lý</button>
+          </div>
+        </div>
+        
+        <div class="card shadow border-danger">
+          <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center" style="background: var(--red-yellow-gradient) !important;">
+            <!-- Phần thông tin chi tiết -->
+            <div>
+              <h5 class="m-0 text-warning fw-bold mb-1" id="chatTitle">Yêu cầu: ---</h5>
+              <div id="chatSubtitle" class="text-light">
+                <!-- Nội dung được điền tự động bằng Javascript -->
+              </div>
+            </div>
+            
+            <!-- Nút gọi / Zalo -->
+            <div class="support-btn text-center ms-3" onclick="contactSupport()" title="Click để gọi hoặc nhắn Zalo hỗ trợ">
+              <i class="fas fa-headset fs-2 text-info" style="color: #ffc107 !important;"></i>
+              <div style="font-size: 0.75rem; font-weight: bold; margin-top: 3px;" class="text-white">Hotline/Zalo</div>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div id="chatBox" class="chat-container"></div>
+            <div class="p-3 bg-white border-top">
+              <div class="input-group">
+                <textarea id="chatInput" class="form-control" rows="2" placeholder="Nhập nội dung trao đổi..."></textarea>
+                <button class="btn btn-danger fw-bold px-4" onclick="sendChat()"><i class="fas fa-paper-plane me-2"></i> Gửi</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANG ĐĂNG NHẬP QUẢN TRỊ -->
+    <div id="adminLoginSection" class="row justify-content-center">
+      <div class="col-md-5 col-sm-8">
+        <div class="card">
+          <div class="card-header text-center"><i class="fas fa-lock me-2"></i> ĐĂNG NHẬP QUẢN TRỊ</div>
+          <div class="card-body p-4">
+            <input type="text" class="form-control mb-3" id="adminUser" placeholder="Tài khoản">
+            <input type="password" class="form-control mb-4" id="adminPass" placeholder="Mật khẩu">
+            <button class="btn btn-theme w-100 py-2" onclick="loginAdmin()">XÁC THỰC</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BẢNG ĐIỀU KHIỂN QUẢN TRỊ -->
+    <div id="adminPanelSection">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <h4 class="text-danger fw-bold m-0 mb-2 mb-md-0"><i class="fas fa-cogs"></i> TRUNG TÂM QUẢN TRỊ</h4>
+        <div>
+           <a id="dbLink" target="_blank" class="btn btn-sm btn-outline-danger fw-bold me-2 d-none"><i class="fas fa-database"></i> Database gốc</a>
+           <button class="btn btn-outline-secondary btn-sm fw-bold" onclick="logoutAdmin()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+        </div>
+      </div>
+      <ul class="nav nav-pills mb-4 flex-wrap" id="pills-tab">
+        <li class="nav-item"><button class="nav-link active" onclick="showAdminPill('req')"><i class="fas fa-list-alt"></i> Quản lý Yêu cầu</button></li>
+        <li class="nav-item"><button class="nav-link" onclick="showAdminPill('stats')"><i class="fas fa-chart-bar"></i> Thống kê</button></li>
+        <li class="nav-item"><button class="nav-link" onclick="showAdminPill('plat')"><i class="fas fa-server"></i> Quản lý Nền tảng</button></li>
+        <li class="nav-item"><button class="nav-link" onclick="showAdminPill('acc')"><i class="fas fa-users-cog"></i> Quản lý Tài khoản</button></li>
+      </ul>
+      <div id="adminContent" class="bg-white p-3 p-md-4 rounded shadow-sm border table-responsive"></div>
+    </div>
+  </div>
+
+  <footer>
+    © Bản quyền thuộc Lê Văn Nguyên - Ủy ban MTTQ Việt Nam thành phố Đồng Nai.<br>
+    <span id="visitCounter" class="fw-bold mt-2 d-inline-block text-secondary">Đang tải số lượt truy cập...</span>
+  </footer>
+
+  <script>
+    let globalData = { platforms: [], requests: [], accounts: [], isAdmin: false };
+    let currentChatCode = "";
+    let currentChatUser = "";
+
+    window.onload = function() {
+      google.script.run.withSuccessHandler(res => {
+        document.getElementById("visitCounter").innerHTML = `Số lượt truy cập hôm nay: <span class="text-danger">${res.today}</span> | Tổng lượt truy cập: <span class="text-danger">${res.total}</span>`;
+      }).updateCounter();
+      fetchPublicData();
+    };
+
+    function fetchPublicData(silent = false) {
+      if(!silent) Swal.fire({title: 'Đang tải dữ liệu...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+      google.script.run.withSuccessHandler(res => {
+        globalData.platforms = res.platforms;
+        globalData.requests = res.list;
+        
+        let sel = document.getElementById("nentang");
+        sel.innerHTML = '<option value="" disabled selected>Chọn hệ thống nền tảng...</option>';
+        res.platforms.forEach(p => { sel.innerHTML += `<option value="${p}">${p}</option>`; });
+        
+        document.getElementById("dbLink").href = res.dbUrl;
+
+        if(globalData.isAdmin) renderAdminContent();
+        if(!silent) Swal.close();
+      }).getPublicData();
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.nav-tabs .nav-link').forEach(el => el.classList.remove('active'));
+      ['formSection', 'trackSection', 'adminLoginSection', 'adminPanelSection', 'chatSection'].forEach(id => document.getElementById(id).style.display = 'none');
+      
+      if(tab === 'form') {
+        document.getElementById('form-tab').classList.add('active');
+        document.getElementById('formSection').style.display = 'flex';
+      } else if (tab === 'track') {
+        document.getElementById('track-tab').classList.add('active');
+        document.getElementById('trackSection').style.display = 'block';
+        document.getElementById('searchResultArea').innerHTML = '';
+        document.getElementById('searchCodeInput').value = '';
+        
+        // Cập nhật thống kê
+        let total = globalData.requests.length;
+        let done = globalData.requests.filter(r => r.trangthai === "Đã xử lý").length;
+        document.getElementById("statTong").innerText = total;
+        document.getElementById("statDaXuLy").innerText = done;
+        document.getElementById("statChuaXuLy").innerText = total - done;
+
+      } else if (tab === 'adminLogin') {
+        document.getElementById('admin-tab').classList.add('active');
+        if(globalData.isAdmin) {
+          document.getElementById('adminPanelSection').style.display = 'block';
+          showAdminPill('req');
+        } else document.getElementById('adminLoginSection').style.display = 'flex';
+      } else if (tab === 'chat') {
+        document.getElementById('chatSection').style.display = 'flex';
+      }
+    }
+
+    function submitForm(e) {
+      e.preventDefault();
+      let formData = {
+        hoten: document.getElementById('hoten').value, sdt: document.getElementById('sdt').value,
+        email: document.getElementById('email').value, nentang: document.getElementById('nentang').value,
+        tieude: document.getElementById('tieude').value, mota: document.getElementById('mota').value
+      };
+      Swal.fire({title: 'Đang gửi yêu cầu...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+      google.script.run.withSuccessHandler(res => {
+          Swal.fire({icon: 'success', title: 'Thành công', html: `<p>Mã Tra Cứu của bạn là: <h2 class="text-danger">${res.maYC}</h2></p><p>Hãy lưu lại mã này để theo dõi tiến độ nhé!</p>`, confirmButtonText: "Đã hiểu"});
+          document.getElementById("dataForm").reset();
+          fetchPublicData(true);
+      }).withFailureHandler(err => Swal.fire('Lỗi', err.message, 'error')).submitData(formData);
+    }
+
+    function searchRequest() {
+      let code = document.getElementById("searchCodeInput").value.trim().toUpperCase();
+      let resArea = document.getElementById("searchResultArea");
+      if(!code) return Swal.fire('Thông báo', 'Vui lòng nhập Mã Yêu Cầu!', 'warning');
+      
+      let req = globalData.requests.find(r => r.maYC && r.maYC.toUpperCase() === code);
+      if(!req) {
+        resArea.innerHTML = `<div class="col-12"><div class="alert alert-danger text-center"><i class="fas fa-times-circle"></i> Không tìm thấy yêu cầu nào với mã <b>${code}</b></div></div>`;
+        return;
+      }
+
+      let isDone = req.trangthai === "Đã xử lý";
+      let badge = `<span class="badge ${isDone ? 'bg-success' : 'bg-warning text-dark'} p-2"><i class="fas ${isDone ? 'fa-check' : 'fa-clock'}"></i> ${req.trangthai}</span>`;
+      
+      resArea.innerHTML = `
+        <div class="col-md-6 mx-auto">
+          <div class="card border-primary" style="cursor:pointer; transition: 0.3s;" onclick="verifyPhone('${req.maYC}')" onmouseover="this.classList.add('shadow-lg')" onmouseout="this.classList.remove('shadow-lg')">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="text-danger fw-bold m-0"><i class="fas fa-ticket-alt"></i> ${req.maYC}</h5>
+                ${badge}
+              </div>
+              <h6 class="fw-bold text-primary">${req.nentang}</h6>
+              <p class="text-muted small mb-0"><i class="fas fa-clock"></i> ${req.thoigian}</p>
+              <div class="mt-3 text-center bg-light p-2 rounded text-secondary" style="font-size: 0.85rem;">
+                <i class="fas fa-hand-pointer text-danger"></i> Nhấp chuột vào đây để xác minh Số điện thoại và trao đổi hỗ trợ
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function verifyPhone(maYC) {
+      Swal.fire({
+        title: '<i class="fas fa-lock text-warning fa-2x mb-2"></i><br>Xác minh Quyền truy cập',
+        html: `<p>Để bảo mật thông tin cá nhân, vui lòng nhập Số điện thoại liên kết với mã Yêu cầu <b class="text-danger">${maYC}</b></p>
+               <input id="verifySdt" type="tel" class="form-control form-control-lg text-center fw-bold" placeholder="VD: 0912345678">`,
+        confirmButtonText: 'Xác minh ngay',
+        confirmButtonColor: '#da251d',
+        showCancelButton: true, cancelButtonText: 'Hủy',
+        preConfirm: () => {
+          let sdt = document.getElementById('verifySdt').value.trim();
+          if(!sdt) Swal.showValidationMessage('Vui lòng nhập Số điện thoại');
+          return sdt;
+        }
+      }).then(r => {
+        if(r.isConfirmed) {
+          Swal.fire({title: 'Đang kiểm tra...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+          google.script.run
+            .withSuccessHandler(res => {
+              if(res.success) {
+                Swal.close(); 
+                openChatRoom(res.info, res.chats);
+              }
+              else Swal.fire('Từ chối truy cập', res.message, 'error');
+            })
+            .withFailureHandler(err => Swal.fire('Lỗi', err.message, 'error'))
+            .verifyAndGetChat(maYC, r.value, false);
+        }
+      });
+    }
+
+    // --- CẬP NHẬT GIAO DIỆN CHAT ---
+    function openChatRoom(info, chats) {
+      currentChatCode = info.maYC;
+      currentChatUser = info.hoten;
+      
+      document.getElementById("chatTitle").innerHTML = "Yêu cầu: " + info.maYC;
+      
+      // Bổ sung thông tin cá nhân lên Header
+      document.getElementById("chatSubtitle").innerHTML = `
+        <div class="mt-1" style="font-size: 0.95rem;">
+          <span class="me-3 fw-bold"><i class="fas fa-user text-warning"></i> ${info.hoten}</span>
+          <span class="me-3"><i class="fas fa-phone text-warning"></i> ${info.sdt}</span>
+          <span class="d-none d-md-inline"><i class="fas fa-envelope text-warning"></i> ${info.email}</span>
+        </div>
+        <div class="mt-1" style="font-size: 0.95rem;">
+          <i class="fas fa-server text-light"></i> <span class="fw-bold">${info.nentang}</span>
+        </div>
+      `;
+      
+      let isDone = info.trangthai === "Đã xử lý";
+      document.getElementById("chatStatusBadge").innerHTML = `<span class="badge ${isDone ? 'bg-success' : 'bg-warning text-dark'} p-2"><i class="fas ${isDone ? 'fa-check' : 'fa-clock'}"></i> ${info.trangthai}</span>`;
+      
+      document.getElementById("adminStatusAction").classList.toggle('d-none', !globalData.isAdmin);
+
+      renderChatMessages(chats);
+      switchTab('chat');
+    }
+    
+    // --- NÚT GỌI/ZALO HỖ TRỢ TRỰC TIẾP ---
+    function contactSupport() {
+       Swal.fire({
+         title: 'Liên hệ Hỗ trợ trực tiếp',
+         html: '<p class="mb-4">Chuyên viên hỗ trợ: <b>Lê Văn Nguyên</b></p>',
+         icon: 'info',
+         showCancelButton: true,
+         showDenyButton: true,
+         confirmButtonText: '<i class="fas fa-phone-alt"></i> Gọi điện thoại',
+         denyButtonText: 'Chat Zalo',
+         cancelButtonText: 'Đóng',
+         confirmButtonColor: '#28a745',
+         denyButtonColor: '#0068ff'
+       }).then((result) => {
+         if (result.isConfirmed) {
+           // Mở trình gọi điện của thiết bị
+           window.location.href = 'tel:0989105186';
+         } else if (result.isDenied) {
+           // Mở Zalo
+           window.open('https://zalo.me/0989105186', '_blank');
+         }
+       });
+    }
+
+    function renderChatMessages(chats) {
+      let box = document.getElementById("chatBox");
+      box.innerHTML = "";
+      chats.forEach(c => {
+        let isMe = (globalData.isAdmin && c.vaitro === 'admin') || (!globalData.isAdmin && c.vaitro === 'user');
+        let alignClass = isMe ? 'msg-user' : 'msg-admin';
+        let nameShow = isMe ? 'Bạn' : (c.vaitro === 'admin' ? 'Quản trị viên' : c.nguoigui);
+        
+        let html = `
+          <div class="msg-bubble ${alignClass}">
+            <span class="msg-time">${nameShow} • ${c.thoigian}</span>
+            <div style="white-space: pre-wrap;">${c.noidung}</div>
+          </div>
+        `;
+        box.innerHTML += html;
+      });
+      box.scrollTop = box.scrollHeight; 
+    }
+
+    function sendChat() {
+      let txt = document.getElementById("chatInput").value.trim();
+      if(!txt) return;
+      let vaitro = globalData.isAdmin ? 'admin' : 'user';
+      let nguoigui = globalData.isAdmin ? 'Admin' : currentChatUser;
+
+      document.getElementById("chatInput").value = ""; 
+      let box = document.getElementById("chatBox");
+      box.innerHTML += `<div class="msg-bubble msg-user opacity-50"><span class="msg-time">Đang gửi...</span>${txt}</div>`;
+      box.scrollTop = box.scrollHeight;
+
+      google.script.run.withSuccessHandler(res => {
+        if(res.success) {
+          google.script.run.withSuccessHandler(data => {
+            if(data.success) renderChatMessages(data.chats);
+          }).verifyAndGetChat(currentChatCode, "", true); 
+        }
+      }).sendChatMessage(currentChatCode, nguoigui, vaitro, txt);
+    }
+
+    function adminToggleStatus(newStat) {
+      Swal.fire({title: 'Đang lưu...', allowOutsideClick: false, didOpen: ()=>Swal.showLoading()});
+      google.script.run.withSuccessHandler(() => {
+        Swal.close();
+        document.getElementById("chatStatusBadge").innerHTML = `<span class="badge ${newStat==='Đã xử lý' ? 'bg-success' : 'bg-warning text-dark'} p-2">${newStat}</span>`;
+        fetchPublicData(true);
+      }).changeRequestStatus(currentChatCode, newStat, false); 
+    }
+
+    // --- ADMIN SCRIPTS ---
+    function loginAdmin() {
+      let u = document.getElementById("adminUser").value;
+      let p = document.getElementById("adminPass").value;
+      Swal.fire({title: 'Đang xác thực...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+      google.script.run.withSuccessHandler(valid => {
+          if(valid) {
+             globalData.isAdmin = true;
+             document.getElementById("dbLink").classList.remove('d-none');
+             Swal.fire({icon: 'success', title: 'Đăng nhập thành công', timer: 1000});
+             switchTab('adminLogin');
+          } else Swal.fire({icon: 'error', title: 'Sai tài khoản hoặc mật khẩu'});
+      }).checkLogin(u, p);
+    }
+
+    function logoutAdmin() {
+      globalData.isAdmin = false;
+      document.getElementById("dbLink").classList.add('d-none');
+      switchTab('track');
+      Swal.fire('Đã thoát Quản trị', '', 'success');
+    }
+
+    let currentAdminPill = 'req';
+    function showAdminPill(pill) {
+      currentAdminPill = pill;
+      document.querySelectorAll('#pills-tab .nav-link').forEach(el => el.classList.remove('active'));
+      event.target.classList.add('active');
+      renderAdminContent();
+    }
+
+    function renderAdminContent() {
+      let div = document.getElementById("adminContent");
+      if(currentAdminPill === 'req') {
+         let html = `
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover text-nowrap">
+              <thead class="bg-light text-center align-middle">
+                <tr><th>Mã YC</th><th>Thời gian</th><th>Người gửi</th><th>Nền tảng</th><th>Trạng thái</th><th>Thao tác</th></tr>
+              </thead>
+              <tbody>`;
+         if(globalData.requests.length === 0) html += `<tr><td colspan='6' class='text-center p-3'>Trống</td></tr>`;
+         globalData.requests.forEach(r => {
+            let isDone = r.trangthai === "Đã xử lý";
+            let badge = `<span class="badge ${isDone ? 'bg-success' : 'bg-warning text-dark'}">${r.trangthai}</span>`;
+            html += `<tr>
+              <td class="fw-bold text-danger align-middle">${r.maYC || ''}</td><td class="small align-middle">${r.thoigian}</td>
+              <td class="align-middle"><b>${r.hoten}</b><br><span class="text-secondary">${r.sdt}</span></td>
+              <td class="text-primary fw-bold align-middle">${r.nentang}</td><td class="text-center align-middle">${badge}</td>
+              <td class="text-center align-middle">
+                <button class="btn btn-sm btn-info text-white fw-bold mb-1 w-100" onclick="adminOpenChat('${r.maYC}')"><i class="fas fa-comments"></i> Trao đổi</button>
+                <button class="btn btn-sm btn-secondary w-100" onclick="deleteReq('${r.thoigian}')"><i class="fas fa-trash"></i> Xóa</button>
+              </td>
+            </tr>`;
+         });
+         div.innerHTML = html + `</tbody></table></div>`;
+      } 
+      else if (currentAdminPill === 'stats') {
+         let html = `
+          <div class="d-flex flex-column flex-md-row justify-content-between mb-3 gap-2">
+            <div class="d-flex flex-column flex-md-row gap-3">
+              <div class="d-flex align-items-center">
+                <span class="fw-bold me-2 text-nowrap"><i class="fas fa-calendar-alt text-primary"></i> Thời gian:</span>
+                <select id="statFilterTime" class="form-select w-auto fw-bold text-primary border-primary" onchange="renderStatsTable()">
+                  <option value="day">Theo Ngày</option>
+                  <option value="month">Theo Tháng</option>
+                  <option value="year">Theo Năm</option>
+                  <option value="all">Tất cả thời gian</option>
+                </select>
+              </div>
+              <div class="d-flex align-items-center">
+                <span class="fw-bold me-2 text-nowrap"><i class="fas fa-server text-primary"></i> Nền tảng:</span>
+                <select id="statFilterPlatform" class="form-select w-auto fw-bold text-primary border-primary" onchange="renderStatsTable()">
+                  <option value="all">Tổng hợp chung</option>
+                  <option value="split">Chi tiết Từng Nền tảng</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-outline-success fw-bold text-nowrap" onclick="exportStatsToCSV()">
+               <i class="fas fa-file-excel me-1"></i> Xuất File
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped text-center">
+              <thead class="bg-light" id="statTableHeader">
+              </thead>
+              <tbody id="statTableBody"></tbody>
+            </table>
+          </div>`;
+         div.innerHTML = html; 
+         renderStatsTable();
+      } else if (currentAdminPill === 'plat') {
+         let html = `<button class="btn btn-success mb-3 fw-bold" onclick="actionPlatform('add')"><i class="fas fa-plus"></i> Thêm Nền tảng</button>
+         <div class="table-responsive"><table class="table table-bordered"><thead><tr class="bg-light"><th>Tên Nền Tảng</th><th class="text-center">Thao tác</th></tr></thead><tbody>`;
+         globalData.platforms.forEach(p => { html += `<tr><td class="fw-bold text-primary align-middle">${p}</td><td class="text-center"><button class="btn btn-sm btn-danger" onclick="actionPlatform('delete', '${p}')"><i class="fas fa-trash"></i></button></td></tr>`; });
+         div.innerHTML = html + `</tbody></table></div>`;
+      } else if (currentAdminPill === 'acc') {
+         google.script.run.withSuccessHandler(accs => {
+           let html = `<button class="btn btn-success mb-3 fw-bold" onclick="actionAccount('add')"><i class="fas fa-user-plus"></i> Cấp tài khoản mới</button>
+           <div class="table-responsive"><table class="table table-bordered"><thead><tr class="bg-light"><th>Tài khoản</th><th>Mật khẩu</th><th class="text-center">Thao tác</th></tr></thead><tbody>`;
+           accs.forEach(a => { html += `<tr><td class="fw-bold align-middle">${a.user}</td><td class="align-middle">${a.pass}</td><td class="text-center"><button class="btn btn-sm btn-danger" onclick="actionAccount('delete', '${a.user}')"><i class="fas fa-trash"></i></button></td></tr>`; });
+           div.innerHTML = html + `</tbody></table></div>`;
+         }).getAdminAccounts();
+      }
+    }
+
+    function adminOpenChat(maYC) {
+      if(!maYC) return Swal.fire('Lỗi', 'Yêu cầu cũ chưa có Mã YC, không thể Chat', 'error');
+      Swal.fire({title: 'Đang tải dữ liệu chat...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+      google.script.run
+        .withSuccessHandler(res => {
+           if(res.success) {
+             Swal.close(); 
+             openChatRoom(res.info, res.chats);
+           }
+           else Swal.fire('Lỗi', res.message, 'error');
+        })
+        .withFailureHandler(err => Swal.fire('Lỗi', err.message, 'error'))
+        .verifyAndGetChat(maYC, "", true); 
+    }
+
+    function renderStatsTable() {
+      let timeType = document.getElementById("statFilterTime").value;
+      let platType = document.getElementById("statFilterPlatform").value;
+      
+      let thead = document.getElementById("statTableHeader");
+      let headerHtml = "<tr>";
+      if(timeType !== 'all') headerHtml += "<th>Thời gian</th>";
+      if(platType === 'split') headerHtml += "<th>Nền tảng</th>";
+      if(timeType === 'all' && platType === 'all') headerHtml += "<th>Phân loại</th>";
+      headerHtml += "<th>Tổng yêu cầu</th><th class='text-success'>Đã xử lý</th><th class='text-danger'>Chờ xử lý</th></tr>";
+      thead.innerHTML = headerHtml;
+
+      let grouped = {};
+      globalData.requests.forEach(r => {
+         let timeKey = "";
+         if(timeType !== 'all') {
+             if(!r.thoigian) return;
+             let parts = r.thoigian.split(" ")[0].split("/"); 
+             if(parts.length < 3) return;
+             if(timeType === 'day') timeKey = `${parts[0]}/${parts[1]}/${parts[2]}`; 
+             else if(timeType === 'month') timeKey = `${parts[1]}/${parts[2]}`;       
+             else if(timeType === 'year') timeKey = `${parts[2]}`;
+         }
+         
+         let platKey = "";
+         if(platType === 'split') platKey = r.nentang || "Khác";
+         
+         let key = "";
+         if(timeType !== 'all' && platType === 'split') key = timeKey + "|||" + platKey;
+         else if(timeType !== 'all') key = timeKey;
+         else if(platType === 'split') key = platKey;
+         else key = "Tổng cộng";
+         
+         if(!grouped[key]) grouped[key] = { time: timeKey, plat: platKey, total: 0, done: 0, pending: 0 };
+         grouped[key].total++;
+         if(r.trangthai === "Đã xử lý") grouped[key].done++;
+         else grouped[key].pending++;
+      });
+      
+      let tbody = document.getElementById("statTableBody");
+      tbody.innerHTML = "";
+      
+      let sortedKeys = Object.keys(grouped).sort((a, b) => {
+         let gA = grouped[a], gB = grouped[b];
+         if(timeType !== 'all') {
+             let pA = gA.time.split('/').reverse().join('');
+             let pB = gB.time.split('/').reverse().join('');
+             if(pA !== pB) return pB.localeCompare(pA);
+         }
+         if(platType === 'split') return gA.plat.localeCompare(gB.plat);
+         return 0;
+      });
+
+      if(sortedKeys.length === 0) {
+         let colSpan = (timeType !== 'all' && platType === 'split') ? 5 : 4;
+         tbody.innerHTML = `<tr><td colspan='${colSpan}' class='text-muted p-3'>Chưa có dữ liệu thống kê.</td></tr>`;
+         return;
+      }
+      
+      sortedKeys.forEach(k => {
+         let g = grouped[k];
+         let rowHtml = "<tr>";
+         if(timeType !== 'all') rowHtml += `<td class="fw-bold text-primary align-middle">${g.time}</td>`;
+         if(platType === 'split') rowHtml += `<td class="fw-bold text-info align-middle text-nowrap">${g.plat}</td>`;
+         if(timeType === 'all' && platType === 'all') rowHtml += `<td class="fw-bold text-primary align-middle">Tổng cộng</td>`;
+         
+         rowHtml += `
+           <td class="fw-bold fs-5 align-middle">${g.total}</td>
+           <td class="text-success fw-bold fs-5 align-middle">${g.done}</td>
+           <td class="text-danger fw-bold fs-5 align-middle">${g.pending}</td>
+         </tr>`;
+         tbody.innerHTML += rowHtml;
+      });
+    }
+
+    function exportStatsToCSV() {
+      let table = document.getElementById("statTableBody");
+      let rows = table.querySelectorAll("tr");
+      
+      if(rows.length === 0 || (rows.length === 1 && rows[0].innerText.includes("Chưa có dữ liệu"))) {
+         Swal.fire('Thông báo', 'Không có dữ liệu để xuất!', 'info');
+         return;
+      }
+
+      let csvContent = "\uFEFF"; 
+      let thead = document.getElementById("statTableHeader").querySelector("tr");
+      let headers = [];
+      thead.querySelectorAll("th").forEach(th => headers.push(`"${th.innerText}"`));
+      csvContent += headers.join(",") + "\n";
+
+      rows.forEach(row => {
+        let cols = row.querySelectorAll("td");
+        let rowData = [];
+        cols.forEach(td => rowData.push(`"${td.innerText}"`));
+        csvContent += rowData.join(",") + "\n";
+      });
+
+      let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      let link = document.createElement("a");
+      let url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      
+      let dateStr = new Date().toLocaleDateString('vi-VN').replace(/\//g, '-');
+      let fileName = `ThongKe_MTTQ_${dateStr}.csv`;
+      
+      link.setAttribute("download", fileName);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function deleteReq(ts) {
+      Swal.fire({title: 'Xóa yêu cầu này?', icon: 'warning', showCancelButton: true}).then(r => {
+         if(r.isConfirmed) {
+            Swal.fire({title: 'Đang xóa...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+            google.script.run.withSuccessHandler(() => fetchPublicData(true)).deleteRequest(ts);
+         }
+      });
+    }
+    
+    function actionPlatform(act, oldVal = '') {
+      if(act === 'delete') {
+         google.script.run.withSuccessHandler(()=>fetchPublicData(true)).managePlatform('delete', oldVal, '');
+      } else {
+         Swal.fire({title: 'Thêm Nền tảng mới', input: 'text', showCancelButton: true}).then(r => {
+           if(r.isConfirmed && r.value.trim() !== "") google.script.run.withSuccessHandler(()=>fetchPublicData(true)).managePlatform(act, oldVal, r.value.trim());
+         });
+      }
+    }
+
+    function actionAccount(act, oldUser = '') {
+      if(act === 'delete') {
+         if(oldUser === 'admin') return Swal.fire('Lỗi', 'Không thể xóa admin', 'error');
+         google.script.run.withSuccessHandler(()=>renderAdminContent()).manageAccount('delete', oldUser, '', '');
+      } else {
+         Swal.fire({
+           title: 'Thêm Tài khoản',
+           html: `<input id="swal-user" class="swal2-input" placeholder="Tài khoản"><input id="swal-pass" class="swal2-input" placeholder="Mật khẩu">`,
+           showCancelButton: true, preConfirm: () => [document.getElementById('swal-user').value, document.getElementById('swal-pass').value]
+         }).then(r => {
+           if(r.isConfirmed && r.value[0] && r.value[1]) google.script.run.withSuccessHandler(()=>renderAdminContent()).manageAccount('add', '', r.value[0], r.value[1]);
+         });
+      }
+    }
+  </script>
+</body>
+</html>
